@@ -1,0 +1,246 @@
+git remote add origin https://github.com/Kevincienka/trabajossss.git
+git branch -M main
+git push -u origin main
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda de Productos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .product-list, .selected-product-list {
+            margin: 20px 0;
+        }
+        .product, .selected-product {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            align-items: center;
+        }
+        .total {
+            font-size: 1.5em;
+            text-align: right;
+        }
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            font-size: 1em;
+            width: 48%;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border: 2px solid #007BFF;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .emergency-button {
+            background-color: #dc3545;
+        }
+        .emergency-button:hover {
+            background-color: #c82333;
+        }
+        .delete-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .delete-button img {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Tienda de Productos</h1>
+        
+        <input type="text" id="search" placeholder="Buscar producto..." oninput="searchProduct()">
+        
+        <div class="product-list" id="product-list">
+            <!-- Los productos se listarán aquí -->
+        </div>
+
+        <h2>Productos Seleccionados</h2>
+        <div class="selected-product-list" id="selected-product-list">
+            <!-- Los productos seleccionados se listarán aquí -->
+        </div>
+
+        <div class="total">Total: $<span id="total">0.00</span></div>
+
+        <div class="actions">
+            <input type="text" id="new-product-name" placeholder="Nombre del nuevo producto">
+            <input type="number" id="new-product-price" placeholder="Precio del nuevo producto">
+            <button onclick="addProduct()">Agregar Producto</button>
+        </div>
+    </div>
+
+    <script>
+        let products = [
+            { name: 'TAC CEREBRO SIMPLE', price: 75.00, emergencyPrice: 120.00 },
+            { name: 'TAC CEREBRO SIMPLE CON VENTANA OSEA Y 3D', price: 80.00, emergencyPrice: 125.00 },
+            { name: 'TAC CEREBRO CONTRASTADO', price: 120.00, emergencyPrice: 160.00 },
+            { name: 'TAC SILLA TURCA', price: 75.00, emergencyPrice: 115.00 },
+            { name: 'TAC TORAX SIMPLE', price: 80.00, emergencyPrice: 120.00 },
+            { name: 'TAC TORAX SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC TORAX CONTRASTADO', price: 120.00, emergencyPrice: 160.00 },
+            { name: 'TAC ABDOMINAL PELVICO (COMPLETO) SIMPLE', price: 120.00, emergencyPrice: 160.00 },
+            { name: 'TAC ABDOMINAL PELVICO (COMPLETO) SIMPLE CON VENTANA OSEA Y 3D', price: 125.00, emergencyPrice: 165.00 },
+            { name: 'TAC ABDOMINAL PELVICO (COMPLETO) CONTRASTADO', price: 160.00, emergencyPrice: 200.00 },
+            { name: 'TAC ABDOMEN INFERIOR O SUPERIOR SIMPLE', price: 80.00, emergencyPrice: 120.00 },
+            { name: 'TAC ABDOMEN INFERIOR O SUPERIOR SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC ABDOMEN INFERIOR O SUPERIOR CONTRASTADO', price: 120.00, emergencyPrice: 160.00 },
+            { name: 'TAC PELVIS SIMPLE', price: 80.00, emergencyPrice: 120.00 },
+            { name: 'TAC PELVIS SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC PELVIS CONTRASTADO', price: 120.00, emergencyPrice: 160.00 },
+            { name: 'TAC COLUMNA LUMBAR CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC COLUMNA DORSAL CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC COLUMNA LUMBOSACRA CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC COLUMNA CERVICAL SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC MACIZOFACIAL SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC S.P.N (SENOS PARANASALES)', price: 80.00, emergencyPrice: 120.00 },
+            { name: 'TAC S.P.N (SENOS PARANASALES) CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC HOMBRO SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC HUMERO SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC CODO SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC ANTEBRAZO SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC MUÑECA SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC MANO SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC CADERA SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC FEMUR SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC RODILLA SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC PIERNA SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC TOBILLO SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC PIE SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 },
+            { name: 'TAC OIDOS SIMPLE', price: 80.00, emergencyPrice: 120.00 },
+            { name: 'TAC OIDOS SIMPLE CON VENTANA OSEA Y 3D', price: 85.00, emergencyPrice: 125.00 }
+        ];
+
+        let filteredProducts = [...products]; // Copia inicial de productos
+        let selectedProducts = [];
+        let total = 0;
+
+        // Función para renderizar la lista de productos
+        function renderProducts() {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+
+            filteredProducts.forEach((product, index) => {
+                const productItem = document.createElement('div');
+                productItem.className = 'product';
+                productItem.innerHTML = `
+                    <span>${product.name}</span>
+                    <span>$${product.price.toFixed(2)}</span>
+                    <div>
+                        <button onclick="addToSelected(${index})">Añadir</button>
+                        <button class="emergency-button" onclick="setEmergencyPrice(${index})">Precio Emergencia</button>
+                    </div>
+                `;
+                productList.appendChild(productItem);
+            });
+        }
+
+        // Función para renderizar la lista de productos seleccionados
+        function renderSelectedProducts() {
+            const selectedProductList = document.getElementById('selected-product-list');
+            selectedProductList.innerHTML = '';
+
+            selectedProducts.forEach((product, index) => {
+                const productItem = document.createElement('div');
+                productItem.className = 'selected-product';
+                productItem.innerHTML = `
+                    <span>${product.name}</span>
+                    <span>$${product.price.toFixed(2)}</span>
+                    <button class="delete-button" onclick="removeSelected(${index})">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Eliminar">
+                    </button>
+                `;
+                selectedProductList.appendChild(productItem);
+            });
+        }
+
+        // Función para añadir un producto desde los resultados filtrados
+        function addToSelected(index) {
+            const product = filteredProducts[index]; // Usar el producto filtrado correctamente
+            selectedProducts.push(product);
+            total += product.price;
+            document.getElementById('total').textContent = total.toFixed(2);
+            renderSelectedProducts();
+        }
+
+        // Función para remover un producto seleccionado
+        function removeSelected(index) {
+            total -= selectedProducts[index].price;
+            selectedProducts.splice(index, 1);
+            document.getElementById('total').textContent = total.toFixed(2);
+            renderSelectedProducts();
+        }
+
+        // Función para aplicar el precio de emergencia en los productos filtrados
+        function setEmergencyPrice(index) {
+            filteredProducts[index].price = filteredProducts[index].emergencyPrice;
+            renderProducts();  // Vuelve a renderizar los productos para actualizar los precios mostrados
+        }
+
+        // Función para buscar productos
+        function searchProduct() {
+            const searchValue = document.getElementById('search').value.toLowerCase();
+            filteredProducts = products.filter(product => product.name.toLowerCase().includes(searchValue)); // Actualiza el arreglo filtrado
+            renderProducts(); // Renderiza los productos filtrados
+        }
+
+        // Función para añadir un nuevo producto
+        function addProduct() {
+            const name = document.getElementById('new-product-name').value;
+            const price = parseFloat(document.getElementById('new-product-price').value);
+
+            if (name && !isNaN(price)) {
+                const newProduct = { name, price, emergencyPrice: price * 1.5 };
+                products.push(newProduct);
+                filteredProducts.push(newProduct); // Añadir también a la lista filtrada
+                renderProducts(); // Volver a renderizar los productos
+                document.getElementById('new-product-name').value = '';
+                document.getElementById('new-product-price').value = '';
+            }
+        }
+
+        // Inicializa la lista de productos al cargar la página
+        renderProducts();
+    </script>
+
+</body>
+</html>
